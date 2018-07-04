@@ -10,22 +10,16 @@ using System.Windows.Forms;
 
 namespace ShopInterface
 {
-    public partial class Form1 : Form
+    public partial class NewProduct : Form
     {
-        public Form1()
+        public NewProduct()
         {
             InitializeComponent();
         }
 
         private void closeBtn_Click(object sender, EventArgs e)
         {
-            Application.Exit();
-        }
-
-        private void addNewBtn_Click(object sender, EventArgs e)
-        {
-            NewProduct nProduct = new NewProduct();
-            nProduct.Show();
+            this.Close();
         }
     }
 }
