@@ -18,6 +18,7 @@ namespace ShopInterface
         }
 
         int selectedProduct;
+        bool isNewProduct;
 
         // List of products. User can transfer products from this list to shopping basket
         static public List<Product> productListing = new List<Product>();
@@ -36,46 +37,84 @@ namespace ShopInterface
             nProduct.Show();
         }
 
+
+        // Refresh the product list. This content comes from either through form or from database
         private void refreshBtn_Click(object sender, EventArgs e)
         {
             productList.Items.Clear();
 
             for (int i = 0; i < productListing.Count; i++)
             {
-                productList.Items.Add(productListing[i].Barcode + " " + productListing[i].ProductName + " " + productListing[i].UnitPrice);
+                productList.Items.Add(productListing[i].Barcode + "\t" + productListing[i].UnitPrice + "\t" + productListing[i].ProductName);
             }
         }
 
         private void productList_SelectedIndexChanged(object sender, EventArgs e)
         {
             int amount = 1;
+            int itemAmount = 1;
             decimal priceToForm = 0;
+
 
             // Determine selected index of selected product, then add that product to
             // shoppingcartlist.
             selectedProduct = productList.SelectedIndex;
-            shoppingCartListing.Add(productListing[selectedProduct]);
 
-            // Create a row, and populate that row with the information of the product
-            // TODO - Come up with a logic that allows to check if the product is already in the list. If it is, raise amount by one.
-            DataGridViewRow row = (DataGridViewRow)productsGrid.Rows[0].Clone();
-            row.Cells[0].Value = shoppingCartListing[selectedProduct].Barcode;
-            row.Cells[1].Value = shoppingCartListing[selectedProduct].ProductName;
-            row.Cells[2].Value = amount;
-            row.Cells[3].Value = shoppingCartListing[selectedProduct].UnitPrice;
-            row.Cells[4].Value = amount * shoppingCartListing[selectedProduct].UnitPrice;
+            // If there is no product in the cart, then it is new by default
+            if (shoppingCartListing.Count == 0)
+            {
+                isNewProduct = true;
+            }
+            else
+            {
+                // Iterate through the shopping cart and check if the selected product is there already
+                for (int i = 0; i < shoppingCartListing.Count; i++)
+                {
+                    // If product exists, check its current amount and add one to it. Then calculate the total price
+                    if (shoppingCartListing[i].Barcode == productListing[selectedProduct].Barcode)
+                    {
+                        isNewProduct = false;
 
-            // Add new row to datagrid
-            productsGrid.Rows.Add(row);
+                        itemAmount = (int)productsGrid.Rows[i].Cells[2].Value;
+                        productsGrid.Rows[i].Cells[2].Value = itemAmount + 1;
+
+                        productsGrid.Rows[i].Cells[4].Value = (int)productsGrid.Rows[i].Cells[2].Value * shoppingCartListing[i].UnitPrice;
+
+                        itemAmount = 1;
+
+                        break;
+                    }
+                    else
+                    {
+                        isNewProduct = true;
+                    }
+                }
+            }
+
+            if (isNewProduct)
+            {
+                // If product is new, then add it into the cart, create all the information for it.
+                shoppingCartListing.Add(productListing[selectedProduct]);
+
+                DataGridViewRow row = (DataGridViewRow)productsGrid.Rows[0].Clone();
+
+                row.Cells[0].Value = shoppingCartListing[selectedProduct].Barcode;
+                row.Cells[1].Value = shoppingCartListing[selectedProduct].ProductName;
+                row.Cells[2].Value = amount;
+                row.Cells[3].Value = shoppingCartListing[selectedProduct].UnitPrice;
+                row.Cells[4].Value = amount * shoppingCartListing[selectedProduct].UnitPrice;
+
+                // Add new row to datagrid
+                productsGrid.Rows.Add(row);
+            }
 
             // Calculates total price
-            for (int i = 0; i < productsGrid.Rows.Count-1; i++)
+            for (int i = 0; i < shoppingCartListing.Count; i++)
             {
                 priceToForm += (decimal)productsGrid.Rows[i].Cells[4].Value;
                 totalPriceLbl.Text = priceToForm.ToString();
             }
             priceToForm = 0;
-            
         }
 
         private void Form1_Load(object sender, EventArgs e)
