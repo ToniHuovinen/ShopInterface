@@ -6,6 +6,7 @@ This software emulates a type of shop interface you could find on any self-servi
 From that list you can move the products into shopping cart, emulating the purchase event. Shopping cart calculates the amount of your products and total prices.
 
 Things to add:
+
 Validation to accept barcodes of certain length only
 
 SQL connecction so that you can fetch products into debug list from SQL database, and if you want you can add new products to database through form
