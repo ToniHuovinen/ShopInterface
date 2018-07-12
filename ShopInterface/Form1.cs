@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MySql.Data.MySqlClient;
 
 namespace ShopInterface
 {
@@ -119,7 +120,39 @@ namespace ShopInterface
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Nothing here yet.
+        }
 
+        private void fromDBBtn_Click(object sender, EventArgs e)
+        {
+            productList.Items.Clear();
+
+            try
+            {
+                string queryString = "SELECT * FROM products";
+
+                // Create connection, command and reader. Change the connection string according to your needs, mines just default local db for debug use
+                // Using phpMyAdmin (XAMPP) as database
+                MySqlConnection connection = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=store");
+                MySqlCommand command = new MySqlCommand(queryString, connection);
+                connection.Open();
+
+                MySqlDataReader reader;
+
+                reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    productListing.Add(new Product(reader.GetInt32(1), reader.GetString(2), (decimal)reader.GetFloat(3)));
+                }
+                reader.Close();
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
