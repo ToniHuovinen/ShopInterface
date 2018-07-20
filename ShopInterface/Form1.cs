@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
 
 namespace ShopInterface
 {
@@ -26,6 +25,7 @@ namespace ShopInterface
 
         // List of products that are in the shopping cart.
         static public List<Product> shoppingCartListing = new List<Product>();
+
 
         private void closeBtn_Click(object sender, EventArgs e)
         {
@@ -53,7 +53,6 @@ namespace ShopInterface
         private void productList_SelectedIndexChanged(object sender, EventArgs e)
         {
             int amount = 1;
-            int itemAmount = 1;
             decimal priceToForm = 0;
 
 
@@ -69,44 +68,17 @@ namespace ShopInterface
             else
             {
                 // Iterate through the shopping cart and check if the selected product is there already
-                for (int i = 0; i < shoppingCartListing.Count; i++)
-                {
-                    // If product exists, check its current amount and add one to it. Then calculate the total price
-                    if (shoppingCartListing[i].Barcode == productListing[selectedProduct].Barcode)
-                    {
-                        isNewProduct = false;
-
-                        itemAmount = (int)productsGrid.Rows[i].Cells[2].Value;
-                        productsGrid.Rows[i].Cells[2].Value = itemAmount + 1;
-
-                        productsGrid.Rows[i].Cells[4].Value = (int)productsGrid.Rows[i].Cells[2].Value * shoppingCartListing[i].UnitPrice;
-
-                        itemAmount = 1;
-
-                        break;
-                    }
-                    else
-                    {
-                        isNewProduct = true;
-                    }
-                }
+                isNewProduct = IsProductNew();
             }
 
             if (isNewProduct)
             {
-                // If product is new, then add it into the cart, create all the information for it.
-                shoppingCartListing.Add(productListing[selectedProduct]);
+                
+                // Uses the count of products in shoppingcart as a location value below. Adds new product on that location.
+                int productPlace = shoppingCartListing.Count;
 
-                DataGridViewRow row = (DataGridViewRow)productsGrid.Rows[0].Clone();
-
-                row.Cells[0].Value = shoppingCartListing[selectedProduct].Barcode;
-                row.Cells[1].Value = shoppingCartListing[selectedProduct].ProductName;
-                row.Cells[2].Value = amount;
-                row.Cells[3].Value = shoppingCartListing[selectedProduct].UnitPrice;
-                row.Cells[4].Value = amount * shoppingCartListing[selectedProduct].UnitPrice;
-
-                // Add new row to datagrid
-                productsGrid.Rows.Add(row);
+                AddNewProduct(productPlace, amount);
+                
             }
 
             // Calculates total price
@@ -123,6 +95,8 @@ namespace ShopInterface
             // Nothing here yet.
         }
 
+
+
         private void fromDBBtn_Click(object sender, EventArgs e)
         {
             productList.Items.Clear();
@@ -131,28 +105,64 @@ namespace ShopInterface
             {
                 string queryString = "SELECT * FROM products";
 
-                // Create connection, command and reader. Change the connection string according to your needs, mines just default local db for debug use
-                // Using phpMyAdmin (XAMPP) as database
-                MySqlConnection connection = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=store");
-                MySqlCommand command = new MySqlCommand(queryString, connection);
-                connection.Open();
-
-                MySqlDataReader reader;
-
-                reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    productListing.Add(new Product(reader.GetInt32(1), reader.GetString(2), (decimal)reader.GetFloat(3)));
-                }
-                reader.Close();
-                connection.Close();
+                DatabaseConnection.GetFromDatabase(queryString);
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show(ex.Message);
             }
+        }
+
+
+
+        private void AddNewProduct(int place, int amount)
+        {
+            // If product is new, then add it into the cart, create all the information for it.
+            shoppingCartListing.Add(productListing[selectedProduct]);
+
+            DataGridViewRow row = (DataGridViewRow)productsGrid.Rows[0].Clone();
+
+            // Here is a bug. selectedProduct must be switched to something else
+            row.Cells[0].Value = shoppingCartListing[place].Barcode;
+            row.Cells[1].Value = shoppingCartListing[place].ProductName;
+            row.Cells[2].Value = amount;
+            row.Cells[3].Value = shoppingCartListing[place].UnitPrice;
+            row.Cells[4].Value = amount * shoppingCartListing[place].UnitPrice;
+
+
+
+            // Add new row to datagrid
+            productsGrid.Rows.Add(row);
+        }
+
+
+        private bool IsProductNew()
+        {
+            bool isNewProduct = false;
+
+            for (int i = 0; i < shoppingCartListing.Count; i++)
+            {
+                //If product exists, check its current amount and add one to it.Then calculate the total price
+                if (shoppingCartListing[i].Barcode == productListing[selectedProduct].Barcode)
+                {
+                    isNewProduct = false;
+
+                    int itemAmount = (int)productsGrid.Rows[i].Cells[2].Value;
+                    productsGrid.Rows[i].Cells[2].Value = itemAmount + 1;
+
+                    productsGrid.Rows[i].Cells[4].Value = (int)productsGrid.Rows[i].Cells[2].Value * shoppingCartListing[i].UnitPrice;
+
+                    itemAmount = 1;
+
+                    break;
+                }
+                else
+                {
+                    isNewProduct = true;
+                }
+            }
+
+            return isNewProduct;
         }
     }
 }
