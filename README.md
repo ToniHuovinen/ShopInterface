@@ -5,10 +5,10 @@ This software emulates a type of shop interface you could find on any self-servi
 
 From that list you can move the products into shopping cart, emulating the purchase event. Shopping cart calculates the amount of your products and total prices.
 
+Project is now quite functional, might have few bugs but I will find those eventually
+
 Things to add:
 
-Validation to accept barcodes of certain length only
-
-SQL connecction so that you can fetch products into debug list from SQL database, and if you want you can add new products to database through form
+Validation to accept barcodes of certain length only and check if there is already a product with same barcode in the database
 
 Maybe a search function that would allow you to fetch items directly from database using barcode. Like a real store.
