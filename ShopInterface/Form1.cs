@@ -115,6 +115,9 @@ namespace ShopInterface
 
 
 
+        // METHODS
+
+
         private void AddNewProduct(int place, int amount)
         {
             // If product is new, then add it into the cart, create all the information for it.

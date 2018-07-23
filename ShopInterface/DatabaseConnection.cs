@@ -29,9 +29,17 @@ namespace ShopInterface
             connection.Close();
         }
 
-        public static void SaveToDatabase()
+        public static void SaveToDatabase(string query)
         {
 
+            MySqlConnection connection = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=store");
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = query;
+
+            connection.Open();
+            command.ExecuteNonQuery();
+
+            connection.Close();
         }
     }
 }

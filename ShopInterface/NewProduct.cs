@@ -39,8 +39,32 @@ namespace ShopInterface
 
         private void toDatabaseBtn_Click(object sender, EventArgs e)
         {
+            try
+            {
+                int barcodeInput = int.Parse(barcodeBox.Text);
+                string nameInput = nameBox.Text;
+                string priceInput = priceBox.Text;
 
+                // Even though this is money, the value is passed along as string. First replace the comma with period, then pass it along.
+                // Insert command treats it as a numeric value because it doesn't have extra quotes around it to turn it into string.
+                string modifiedPrice = priceInput.Replace(',', '.');
+                
+                // NULL value on ProductID makes the database to increment ID with one since it is set as Auto Increment
+                string toDatabaseQuery = $"INSERT INTO Products (ProductID, Barcode, ProductName, UnitPrice) VALUES (NULL," +
+                                barcodeInput + "," + "\"" +
+                                nameInput + "\"" + "," +
+                                modifiedPrice + ")";
+
+                DatabaseConnection.SaveToDatabase(toDatabaseQuery);
+
+                ClearFields();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
+
 
         private void ClearFields()
         {
